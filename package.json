@@ -1,0 +1,17 @@
+{
+  "name": "hentaibotjs",
+  "version": "0.0.1",
+  "description": "UltimateHentaiBot rewrote in JS",
+  "main": "index.js",
+  "dependencies": {
+    "discord.js": "^11.4.2",
+    "nekos.life": "^2.0.4",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "31ank",
+  "license": "GNU"
+}
