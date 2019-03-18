@@ -1,3 +1,4 @@
+const fs = require('fs');
 const config = require("./botconfig.json");
 const nekoclient = require('nekos.life');
 const Discord = require("discord.js");
@@ -6,6 +7,9 @@ const neko = new nekoclient();
 const request = require("request");
 // need rework https://nekos.life/api/v2/endpoints
 const nsfwlist = ["nsfw_neko_gif", "randomHentaiGif", "pussy", "nekoGif", "neko", "lesbian", "kuni", "cumsluts", "classic", "boobs", "bJ", "anal", "avatar", "yuri", "trap", "tits", "girlSoloGif", "girlSolo", "smallBoobs", "pussyWankGif", "pussyArt", "kemonomimi", "kitsune", "keta", "holo", "holoEro", "hentai", "futanari", "femdom", "feetGif", "eroFeet", "feet", "ero", "eroKitsune", "eroKemonomimi", "eroNeko", "eroYuri", "cumArts", "blowJob", "pussyGif"];
+
+const channelsName = './channels.json';
+const channels = require(channelsName);
 
 
 const bot = new Discord.Client();
@@ -64,7 +68,37 @@ bot.on("message", async message => {
         }
     }
 
+    if(cmd == `${prefix}add`){
+        channels.entries.push({"ch": message.channel.id, "sub": args});
+        fs.writeFile(channelsName, JSON.stringify(channels), function(err){
+            if(err) return console.log(err);
+            console.log("Updated channels file:" + message.channel.id + ":" + args);
+        });
+    }
 
+    if(cmd == `${prefix}remove`){
+
+    }
 });
 
+function sendMessage(){
+    let rawdata = fs.readFileSync("./channels.json");
+    let out_channels = JSON.parse(rawdata);
+    out_channels.entries.forEach(element => {
+        let channel = element["ch"];
+        try{
+            request(`https://www.reddit.com/r/${element.sub}/rising/.json?limit={1}`, function(error, response, body){
+                let items = JSON.parse(body);
+                let imgurl = items["data"]["children"]["0"]["data"]["url"];
+                bot.channels.get(channel).send(imgurl);
+            });
+        } catch {
+            console.log("Send message error\nBot offline?")
+        }
+        setTimeout(sendMessage, 10000);
+    });
+}
+
 bot.login(config.token);
+
+setTimeout(sendMessage, 5000);
