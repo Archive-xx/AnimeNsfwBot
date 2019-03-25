@@ -76,7 +76,7 @@ bot.on("message", async message => {
 
     if(cmd == `${prefix}remove`){
         let channelid = message.channel.id;
-        return message.channel.send("Faild! Code: ```RCF:" + channelid + "```Please message this code to @31ank#4002")
+        return message.channel.send("Not supported atm! Code: ```RCF:" + channelid + "```")
     }
 
     if(cmd == `${prefix}force`){
@@ -88,7 +88,6 @@ function sendMessage(force = false){
     let rawdata = fs.readFileSync("./channels.json");
     let out_channels = JSON.parse(rawdata);
     var times = ['00', '04', '08', '12', '16', '20'];
-    console.log(times);
     var update = false;
     currentDate = new Date();
     times.forEach(function(element){
@@ -97,6 +96,9 @@ function sendMessage(force = false){
         time_min.setMinutes(0);
         let time_max = new Date(time_min.getTime());
         time_max.setMinutes('30');
+        console.log(time_min.getHours() + ":" + time_min.getMinutes());
+        console.log(currentDate.getHours() + ":" + currentDate.getMinutes());
+        console.log(time_max.getHours() + ":" + time_max.getMinutes());
         if(currentDate.getTime() > time_min.getTime() && currentDate.getTime() < time_max.getTime()){
             update = true;
         }
