@@ -75,8 +75,18 @@ bot.on("message", async message => {
     }
 
     if(cmd == `${prefix}remove`){
-        let channelid = message.channel.id;
-        return message.channel.send("Not supported atm! Code: ```RCF:" + channelid + "```")
+        channels.entries.forEach(element => {
+            if(element.ch == message.channel.id){
+                element.ch = 0;
+                return;
+            }
+            counter++;
+        }); 
+        console.log("Deleted entry");
+        fs.writeFile(channelsName, JSON.stringify(channels), function(err){
+            if(err) return console.log(err);
+        });
+        return message.channel.send("Remove channel from all update lists");
     }
 
     if(cmd == `${prefix}force`){
@@ -109,17 +119,19 @@ function sendMessage(force = false){
     if(update){
         console.log("Updatetime: " + currentDate.getTime());
         out_channels.entries.forEach(element => {
-            let channel = element["ch"];
-            try{
-                request(`https://www.reddit.com/r/${element.sub}/rising/.json?limit={1}`, function(error, response, body){
-                    let items = JSON.parse(body);
-                    let imgurl = items["data"]["children"]["0"]["data"]["url"];
-                    bot.channels.get(channel).send(imgurl);
-                });
-            } catch {
-                console.log("Send message error\nBot offline?")
+            if(element.ch != 0){
+                let channel = element["ch"];
+                try{
+                    request(`https://www.reddit.com/r/${element.sub}/rising/.json?limit={1}`, function(error, response, body){
+                        let items = JSON.parse(body);
+                        let imgurl = items["data"]["children"]["0"]["data"]["url"];
+                        bot.channels.get(channel).send(imgurl);
+                    });
+                } catch {
+                    console.log("Send message error\nBot offline?")
+                }
+                setTimeout(sendMessage, 1800000); // Every half hour check
             }
-            setTimeout(sendMessage, 1800000); // Every half hour check
         });
     }
 }
