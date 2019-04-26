@@ -1,5 +1,5 @@
 # HentaiBotJS
-UltimateHentaiBot rewritten in JS
+UltimateHentaiBot rewritten in JS (still in alpha)
 
 Command | Description | Usage
 ----------------|-------------|--------
