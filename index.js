@@ -86,7 +86,7 @@ bot.on("message", async message => {
         fs.writeFile(channelsName, JSON.stringify(channels), function(err){
             if(err) return console.log(err);
         });
-        return message.channel.send("Remove channel from all update lists");
+        return message.channel.send("Removed channel from all update lists");
     }
 
     if(cmd == `${prefix}force`){
@@ -106,18 +106,18 @@ function sendMessage(force = false){
         time_min.setMinutes(0);
         let time_max = new Date(time_min.getTime());
         time_max.setMinutes('30');
-        console.log(time_min.getHours() + ":" + time_min.getMinutes());
-        console.log(currentDate.getHours() + ":" + currentDate.getMinutes());
-        console.log(time_max.getHours() + ":" + time_max.getMinutes());
         if(currentDate.getTime() > time_min.getTime() && currentDate.getTime() < time_max.getTime()){
             update = true;
+            console.log("Updating at:");
+            console.log(time_min.getHours() + ":" + time_min.getMinutes());
+            console.log(currentDate.getHours() + ":" + currentDate.getMinutes());
+            console.log(time_max.getHours() + ":" + time_max.getMinutes());
         }
     });
     if(force){
         update = true;
     }
     if(update){
-        console.log("Updatetime: " + currentDate.getTime());
         out_channels.entries.forEach(element => {
             if(element.ch != 0){
                 let channel = element["ch"];
@@ -128,11 +128,13 @@ function sendMessage(force = false){
                         bot.channels.get(channel).send(imgurl);
                     });
                 } catch {
-                    console.log("Send message error\nBot offline?")
+                    console.log("Error getting data\nSubreddit: " + element.sub + " Channel: " + element.ch)
                 }
-                setTimeout(sendMessage, 1800000); // Every half hour check
+                setTimeout(sendMessage, 1790000); // Every half hour check
             }
         });
+    } else {
+        console.log("No update at " + currentDate.getHours() + ":" + currentDate.getMinutes())
     }
 }
 
