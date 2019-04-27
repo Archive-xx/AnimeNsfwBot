@@ -80,7 +80,6 @@ bot.on("message", async message => {
                 element.ch = 0;
                 return;
             }
-            counter++;
         }); 
         console.log("Deleted entry");
         fs.writeFile(channelsName, JSON.stringify(channels), function(err){
@@ -116,20 +115,23 @@ function sendMessage(force = false){
     });
     if(force){
         update = true;
+        console.log("Updating (forced)");
     }
     if(update){
         out_channels.entries.forEach(element => {
             if(element.ch != 0){
                 let channel = element["ch"];
-                try{
-                    request(`https://www.reddit.com/r/${element.sub}/rising/.json?limit={1}`, function(error, response, body){
+                request(`https://www.reddit.com/r/${element.sub}/rising/.json?limit={1}`, function(error, response, body){
+                    try{
                         let items = JSON.parse(body);
                         let imgurl = items["data"]["children"]["0"]["data"]["url"];
                         bot.channels.get(channel).send(imgurl);
-                    });
-                } catch {
-                    console.log("Error getting data\nSubreddit: " + element.sub + " Channel: " + element.ch)
-                }
+                    } catch{
+                        console.log("Error with sub " + element.sub + " and channel " + element.ch);
+                        bot.channels.get(channel).send("Error getting data from " + element.sub);
+                    }
+                });
+                
                 setTimeout(sendMessage, 1790000); // Every half hour check
             }
         });
