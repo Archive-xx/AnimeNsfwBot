@@ -67,36 +67,46 @@ bot.on("message", async message => {
     }
 
     if(cmd == `${prefix}add`){
-        channels.entries.push({"ch": message.channel.id, "sub": args});
-        fs.writeFile(channelsName, JSON.stringify(channels), function(err){
-            if(err) return console.log(err);
-            console.log("Updated channels file:" + message.channel.id + ":" + args);
-        });
-        return message.channel.send("Added channel to update list with subreddit: " + args);
+        if(message.member.hasPermission("ADMINISTRATOR")){
+            channels.entries.push({"ch": message.channel.id, "sub": args});
+            fs.writeFile(channelsName, JSON.stringify(channels), function(err){
+                if(err) return console.log(err);
+                console.log("Updated channels file:" + message.channel.id + ":" + args);
+            });
+            return message.channel.send("Added channel to update list with subreddit: " + args);
+        } else {
+            return message.channel.send("You don't have admin permissions");
+        }
     }
 
     if(cmd == `${prefix}remove`){
-        channels.entries.forEach(element => {
-            if(element.ch == message.channel.id){
-                element.ch = 0;
-                return;
-            }
-        }); 
-        console.log("Deleted entry");
-        fs.writeFile(channelsName, JSON.stringify(channels), function(err){
-            if(err) return console.log(err);
-        });
-        return message.channel.send("Removed channel from all update lists");
+        if(message.member.hasPermission("ADMINISTRATOR")){
+            channels.entries.forEach(element => {
+                if(element.ch == message.channel.id){
+                    element.ch = 0;
+                    return;
+                }
+            }); 
+            console.log("Deleted entry");
+            fs.writeFile(channelsName, JSON.stringify(channels), function(err){
+                if(err) return console.log(err);
+            });
+            return message.channel.send("Removed channel from all update lists");
+        } else {
+            return message.channel.send("You don't have admin permissions");
+        }
     }
 
     if(cmd == `${prefix}force`){
-        sendMessage(true);
+        if(message.author.id == config.adminid){
+            sendMessage(true);
+        } else {
+            console.log("User with ID tried force: " + message.author.id);
+        }
     }
 });
 
 function sendMessage(force = false){
-    let rawdata = fs.readFileSync("./channels.json");
-    let out_channels = JSON.parse(rawdata);
     var times = ['00', '04', '08', '12', '16', '20'];
     var update = false;
     currentDate = new Date();
@@ -119,6 +129,8 @@ function sendMessage(force = false){
         console.log("Updating (forced)");
     }
     if(update){
+        let rawdata = fs.readFileSync("./channels.json");
+        let out_channels = JSON.parse(rawdata);
         var data = {};
         out_channels.entries.forEach(element => {
             if(element.ch != 0){
