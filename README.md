@@ -11,3 +11,4 @@ Command | Description | Usage
 ## Requirements:
 - Discord JS
 - Request
+- Sync-Request
