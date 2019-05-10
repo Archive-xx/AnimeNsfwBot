@@ -2,6 +2,7 @@ const fs = require('fs');
 const config = require("./botconfig.json");
 const Discord = require("discord.js");
 const request = require("request");
+const syncreq = require("sync-request");
 // need rework https://nekos.life/api/v2/endpoints
 const nsfwlist = ["nsfw_neko_gif", "randomHentaiGif", "pussy", "nekoGif", "neko", "lesbian", "kuni", "cumsluts", "classic", "boobs", "bJ", "anal", "avatar", "yuri", "trap", "tits", "girlSoloGif", "girlSolo", "smallBoobs", "pussyWankGif", "pussyArt", "kemonomimi", "kitsune", "keta", "holo", "holoEro", "hentai", "futanari", "femdom", "feetGif", "eroFeet", "feet", "ero", "eroKitsune", "eroKemonomimi", "eroNeko", "eroYuri", "cumArts", "blowJob", "pussyGif"];
 
@@ -118,20 +119,27 @@ function sendMessage(force = false){
         console.log("Updating (forced)");
     }
     if(update){
+        var data = {};
         out_channels.entries.forEach(element => {
             if(element.ch != 0){
                 let channel = element["ch"];
-                request(`https://www.reddit.com/r/${element.sub}/rising/.json?limit={1}`, function(error, response, body){
+                if (!data.hasOwnProperty(element.sub)){
+                    console.log("Adding " + element.sub + " to update list");
+                    var link = "Error getting data with " + element.sub;
+                    url = "https://www.reddit.com/r/" + element.sub + "/rising/.json?limit={1}"
                     try{
-                        let items = JSON.parse(body);
+                        var req = syncreq("GET", url);
+                        let items = JSON.parse(req.getBody());
                         let imgurl = items["data"]["children"]["0"]["data"]["url"];
-                        bot.channels.get(channel).send(imgurl);
+                        link = imgurl;
                     } catch{
                         console.log("Error with sub " + element.sub + " and channel " + element.ch);
-                        bot.channels.get(channel).send("Error getting data from " + element.sub);
                     }
-                });
-                
+                    data[element.sub] = link;
+                } else {
+                    console.log(element.sub + " already in list");
+                }
+                bot.channels.get(channel).send(data[element.sub]);
                 setTimeout(sendMessage, 1790000); // Every half hour check
             }
         });
