@@ -1,5 +1,4 @@
 const fs = require('fs');
-const config = require("./botconfig.json");
 const Discord = require("discord.js");
 const request = require("request");
 const syncreq = require("sync-request");
@@ -8,6 +7,7 @@ const nsfwlist = ["nsfw_neko_gif", "randomHentaiGif", "pussy", "nekoGif", "neko"
 
 const channelsName = './channels.json';
 const channels = require(channelsName);
+const config = require("./botconfig.json");
 
 
 const bot = new Discord.Client();
@@ -104,6 +104,23 @@ bot.on("message", async message => {
             console.log("User with ID tried force: " + message.author.id);
         }
     }
+
+    if(cmd == `${prefix}r`){
+        if(message.channel.nsfw){
+            request("https://www.reddit.com/r/" + args + "/rising/.json?limit={1}/" + args, function(error, response, body){
+                let msg = JSON.parse(body);
+                    try{
+                        let imgurl = msg["data"]["children"]["0"]["data"]["url"];
+                        return message.channel.send(imgurl);
+                    }
+                    catch{
+                        return message.channel.send("Error getting data from subreddit " + args);
+                    }
+                });
+        } else {
+            return message.channel.send("Channel is not set nsfw");
+        }
+    }
 });
 
 function sendMessage(force = false){
@@ -145,13 +162,18 @@ function sendMessage(force = false){
                         let imgurl = items["data"]["children"]["0"]["data"]["url"];
                         link = imgurl;
                     } catch{
-                        console.log("Error with sub " + element.sub + " and channel " + element.ch);
+                        console.log("Error with sub " + element.sub);
                     }
                     data[element.sub] = link;
                 } else {
                     console.log(element.sub + " already in list");
                 }
-                bot.channels.get(channel).send(data[element.sub]);
+                var tosend = bot.channels.get(channel);
+                if (tosend.nsfw){
+                    tosend.send(data[element.sub]);
+                } else {
+                    tosend.send("Channel not marked as nsfw");
+                }
                 setTimeout(sendMessage, 1790000); // Every half hour check
             }
         });

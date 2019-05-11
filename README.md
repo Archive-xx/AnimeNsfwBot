@@ -7,6 +7,7 @@ Command | Description | Usage
 `<neko` | Get picture from nekos.life | `<neko [tag]`
 `<add` | Add channel to update list | `<add [subreddit]`
 `<remove` | Remove channel from all update lists | `<remove`
+`<r` | Get rising post from a sub | `<r hentai`
 
 ## Requirements:
 - Discord JS
